@@ -1,57 +1,58 @@
-# Challenge: Java and JavaScript. Programming Procedures (BookingMx)
+# 🧠 Challenge: Java and JavaScript — Programming Procedures (BookingMx)
 
-![Project Status](https://img.shields.io/badge/Sprint_1_(Java)-COMPLETE_(95%25)-green)
-![Project Status](https://img.shields.io/badge/Sprint_2_(JS)-Pending-lightgrey)
+[![Java CI Build and Test](https://github.com/Diego2gonzalez/BookingMx-UnitTests/actions/workflows/ci.yml/badge.svg)](https://github.com/Diego2gonzalez/BookingMx-UnitTests/actions/workflows/ci.yml)
+![Sprint 1 Coverage](https://img.shields.io/badge/Java_Coverage-97%25-brightgreen)
+![Sprint 2 Status](https://img.shields.io/badge/Sprint_2_(JS)-Pending-lightgrey)
 
-This repository contains the solution for the Digital NAO Challenge, focusing on implementing a robust, scalable, and maintainable unit testing strategy for the BookingMx website.
-
-This project is developed to meet the **C2 (Proficient)** standards of the challenge rubric.
+This repository contains the solution for the **Digital NAO Challenge**, focused on implementing a robust, scalable, and maintainable testing strategy for the BookingMx website.
 
 ---
 
-## 🚀 C2 Proficient Justification
+## 🚀 Alignment with C2 (Proficient) Rubric
 
-This project demonstrates C2-level proficiency by not just *completing* tasks, but by implementing strategic, scalable solutions that demonstrate leadership.
+This project demonstrates **C2-level proficiency** by delivering scalable, automated, and strategic testing solutions.
 
 | Rubric Criterion (C2 - Proficient) | Project Evidence & Justification |
 | :--- | :--- |
-| **Design and execution of unit tests with JUnit** | "Demonstrates **leadership and creativity** in guiding the design and execution of... **effective testing strategies** in complex... environments..." |
-| **Process Documentation** | "Demonstrates leadership and creativity in establishing **innovative standards and procedures** for the strategic implementation of documentation..." |
-| **Integration of innovative elements** | "Identifies, integrates, and presents a **highly innovative solution**... considering factors such as **scalability**... and economic feasibility..." |
-
-**Our C2 Strategy:**
-* We implemented a **Dependency Injection (DI)** pattern using **Mockito**. This is an innovative and effective strategy that isolates the `ReservationService` from the database, satisfying the C2 (JUnit) criterion.
-* We established a **3-part documentation standard** (JavaDoc, `README.md`, `SPRINT1_LOG.md`) that explains the *What*, the *How*, and the *Why*. This strategic implementation satisfies the C2 (Documentation) criterion.
-* The `Service/Repository` pattern is a **highly scalable** solution. The BookingMx team can now add `PaymentService` or `UserService` using the exact same robust, testable pattern, satisfying the C2 (Innovation) criterion.
+| **Design and execution of unit tests with JUnit** | “Demonstrates **leadership and creativity**... in designing **effective testing strategies** in complex environments.” <br><br>✅ **Evidence:** Multi-layered testing strategy: <br> 1. **Unit Tests (Mocking):** Used Mockito to isolate business logic (`ReservationService`). <br> 2. **Integration Tests (H2):** Used an in-memory DB to validate *real SQL* (`JdbcReservationRepository`). <br> 3. **Parameterized Tests:** Used `@ParameterizedTest` to achieve 100% branch coverage. |
+| **Process Documentation** | “Demonstrates leadership... establishing **innovative standards and procedures** for documentation.” <br><br>🧭 **Evidence:** C2-level process automation: <br> 1. **GitHub Actions (CI/CD):** Workflow (`ci.yml`) runs all tests on each push. <br> 2. **Quality Gate:** Build *fails automatically* if JaCoCo < 90%. <br> 3. **3-Part Docs:** `JavaDoc` (What) • `README.md` (How) • `SPRINT1_LOG.md` (Why). |
+| **Integration of innovative elements** | “Identifies and integrates **highly innovative solutions**, considering scalability.” <br><br>⚙️ **Evidence:** <br> 1. **DI Pattern:** The `Service/Repository` architecture scales easily for future modules (`PaymentService`, etc.). <br> 2. **Cross-Platform Build:** Using Maven, H2, and GitHub Actions guarantees identical results across OS and IDEs. |
 
 ---
 
 ## 🛠️ Technology Stack & Tools (Sprint 1)
 
-This project is managed by Apache Maven, which ensures a consistent development environment for all collaborators (macOS, Windows, or Linux).
+This project is powered by **Apache Maven**, ensuring consistency across platforms.
 
-| Tool | Purpose | Version (from `pom.xml`) |
+| Tool | Purpose | Version |
 | :--- | :--- | :--- |
-| **Java** | Core Application Language | `17` |
-| **Apache Maven** | Project Management & Build Tool | `3.x` |
-| **JUnit 5** | Testing Framework | `5.9.1` |
-| **Mockito** | Mocking Framework for DI | `5.5.0` |
-| **JaCoCo** | Code Coverage Report Tool | `0.8.8` |
+| ☕ **Java** | Core Application Language | `17` |
+| 🧩 **Apache Maven** | Project Management & Build Tool | `3.x` |
+| 🧪 **JUnit 5** | Core Testing Framework | `5.9.1` |
+| 🧠 **Mockito** | Mocking Framework (for Unit Tests) | `5.5.0` |
+| 📈 **JaCoCo** | Code Coverage Report Tool | `0.8.8` |
+| 💾 **H2 Database** | In-Memory DB (for Integration Tests) | `2.2.224` |
+| 🚦 **Maven Failsafe** | Runs Integration Tests (`*IT.java`) | `3.2.5` |
 
 ---
 
-## Sprint 1: Reservations Module (Java with JUnit)
+## 🧪 Multi-Layered Testing Strategy (Sprint 1)
 
-**Status: COMPLETE**
+**Status:** ✅ COMPLETE  
+We implemented a **two-layer testing architecture** to validate both business logic and persistence.
 
-Implementation of a unit test suite for the Java reservations module, achieving **95% code coverage** (exceeding the 90% target), as verified by the JaCoCo report.
+---
 
-### C2 Architecture: Dependency Injection & Mocking
+### 🧱 Layer 1: Unit Tests (Mocking)
 
-To ensure true, isolated unit tests, we implemented a **Dependency Injection (DI)** pattern. The diagram below illustrates our C2 testing strategy:
+**Purpose:** Validate the *business logic* in `ReservationService` without hitting a real DB.  
+**Tool:** Mockito  
+**Coverage:** 97% instruction, 100% branch coverage.
 
+**Diagram: Unit Testing Flow**
+```mermaid
 graph TD
-    subgraph "Test Environment"
+    subgraph "Test Environment (Unit)"
         A[ReservationServiceTest] -- 1. Injects Mock --> B((ReservationRepository Mock));
         A -- 2. Calls method --> C(ReservationService);
         B -- 3. Returns mock data --> C;
@@ -62,4 +63,81 @@ graph TD
     end
 
     A -- 4. Asserts results --> E(Test Passed/Failed);
+```
+
+---
+
+### 🧩 Layer 2: Integration Tests (H2 Database)
+
+**Purpose:** Validate **real SQL logic** in `JdbcReservationRepository`.  
+**Tool:** H2 (in-memory DB) + Maven Failsafe.  
+**Goal:** Ensure queries like `findById` and `isRoomAvailable` run correctly in an actual DB context.  
+**Execution:** Automatically runs during Maven’s `verify` phase.
+
+---
+
+## 🤖 Continuous Integration / Continuous Deployment (CI/CD)
+
+This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`).
+
+🔁 **Workflow Tasks:**
+1. Trigger on each `push` to `main` or `dev-david`.
+2. Set up Ubuntu VM with Java 17 + Maven.
+3. Run full build pipeline:  
+   ```bash
+   mvn clean verify
+   ```
+4. Execute all **12 tests** (8 Unit + 4 Integration).  
+5. Enforce **Quality Gate** → Build fails if coverage < 90%.
+
+---
+
+## 🏃 How to Run the Project Locally
+
+### ⚙️ Requirements
+- Java JDK 11 or higher  
+- Apache Maven
+
+---
+
+### 🧩 1. Run **Unit Tests Only** (Fast Execution)
+
+```bash
+mvn clean test
+```
+
+🧾 *Optional:* Open the coverage report:  
+```bash
+open target/site/jacoco/index.html
+```
+
+---
+
+### 🔬 2. Run **Full Pipeline** (Unit + Integration Tests)
+
+Runs all tests and applies CI/CD checks exactly like GitHub Actions.
+
+```bash
+mvn clean verify
+```
+
+✅ **Expected Output:**  
+```
+[INFO] BUILD SUCCESS
+Tests run: 12, Failures: 0, Errors: 0
+```
+
+<img width="1185" height="544" alt="Screenshot 2025-11-07 at 3 33 22 p m" src="https://github.com/user-attachments/assets/4cb11a59-193d-4724-975b-7c6ee98bd04e" />
+
+---
+
+## 📚 Project Documentation
+
+- 🧠 **Internal:** All classes and methods are documented with **JavaDoc**.  
+- 🗂️ **External:** Architectural decisions logged in **[SPRINT1_LOG.md](https://www.google.com/search?q=SPRINT1_LOG.md)**.
+
+---
+
+✨ *Maintained by **Luis David Mag** — Data Engineer & Automation Specialist.*  
+📦 *Version:* `C2-Final-Sprint1`
 
