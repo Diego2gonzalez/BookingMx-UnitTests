@@ -9,6 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import org.mockito.InjectMocks;
@@ -88,11 +92,15 @@ class ReservationServiceTest {
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 
-    @Test
-    @DisplayName("3. Should throw InvalidDatesException if check-out is before check-in")
-    void testCreateReservation_Fail_InvalidDates() {
-        // --- 1. ARRANGE ---
-        LocalDate badCheckOut = LocalDate.of(2025, 11, 30); // One day BEFORE check-in
+    // --- ESTA ES LA PRUEBA MODIFICADA ---
+    @ParameterizedTest(name = "[{index}] Should fail when check-out is {1}")
+    @DisplayName("3. Should throw InvalidDatesException for all invalid date ranges")
+    @CsvSource({
+        "2025-11-30, 'before check-in'",  // Caso 1: check-out es ANTES
+        "2025-12-01, 'equal to check-in'" // Caso 2: check-out es IGUAL
+    })
+    void testCreateReservation_Fail_InvalidDates(LocalDate badCheckOut, String scenario) {
+        // --- 1. ARRANGE (CHECK_IN es 2025-12-01) ---
         
         // --- 2. ACT & 3. ASSERT ---
         InvalidDatesException exception = assertThrows(
@@ -106,6 +114,7 @@ class ReservationServiceTest {
         verify(reservationRepository, never()).isRoomAvailable(anyString(), any(), any());
         verify(reservationRepository, never()).save(any());
     }
+
 
     // --- Tests for editReservation ---
     
@@ -127,21 +136,17 @@ class ReservationServiceTest {
     @DisplayName("6. Should cancel an existing reservation successfully")
     void testCancelReservation_Success() {
         // --- 1. ARRANGE ---
-        // Create a "fake" reservation to be "found" by the mock repository
         Reservation mockReservation = new Reservation(RESERVATION_ID);
         mockReservation.setStatus("ACTIVE");
         
-        // "WHEN findById is called... THEN return our fake reservation"
         when(reservationRepository.findById(RESERVATION_ID)).thenReturn(mockReservation);
 
         // --- 2. ACT ---
         boolean result = service.cancelReservation(RESERVATION_ID);
 
         // --- 3. ASSERT ---
-        assertTrue(result); // The method should return true
-        // Verify the reservation's status was changed to CANCELLED
+        assertTrue(result);
         assertEquals("CANCELLED", mockReservation.getStatus());
-        // Verify the save() method was called exactly once with this reservation
         verify(reservationRepository, times(1)).save(mockReservation);
     }
 
@@ -149,7 +154,6 @@ class ReservationServiceTest {
     @DisplayName("7. Should throw ReservationNotFoundException if reservation to cancel does not exist")
     void testCancelReservation_Fail_ReservationNotFound() {
         // --- 1. ARRANGE ---
-        // "WHEN findById is called... THEN return null (not found)"
         when(reservationRepository.findById(RESERVATION_ID)).thenReturn(null);
         
         // --- 2. ACT & 3. ASSERT ---
@@ -160,10 +164,7 @@ class ReservationServiceTest {
             }
         );
         
-        // Verify the error message is correct
         assertEquals("Reservation not found with ID: " + RESERVATION_ID, exception.getMessage());
-        
-        // Verify that save() was NEVER called
         verify(reservationRepository, never()).save(any(Reservation.class));
     }
 }
