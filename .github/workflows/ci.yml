@@ -1,0 +1,43 @@
+# Nombre del flujo de trabajo que verás en GitHub
+name: Java CI Build and Test
+
+on:
+  # Se ejecuta cuando haces push a estas ramas
+  push:
+    branches: [ "main", "dev-david" ]
+  # También se ejecuta cuando alguien crea un Pull Request a "main"
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # Se ejecuta en un servidor virtual de Ubuntu
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Descarga tu código al servidor
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configura Java 17 (basado en tu pom.xml)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Guarda las dependencias de Maven para que las próximas veces sea más rápido
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # 4. Ejecuta el comando C2: "verify"
+      # "verify" ejecuta TODO: compila, corre pruebas unitarias (test)
+      # y corre pruebas de integración (integration-test).
+      # También revisa la cobertura de 90% de JaCoCo.
+      - name: Build, Test (Unit & Integration), and Check Coverage
+        run: mvn clean verify
