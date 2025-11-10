@@ -1,27 +1,25 @@
 package mx.com.booking.reservations;
 
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * C2 Improvement: Integration Test (IT)
- * This test runs against a REAL (in-memory) H2 database.
- * It does NOT use Mockito. It tests the real SQL.
- * It will be run by the 'maven-failsafe-plugin'.
- */
-@DisplayName("Integration Tests for JdbcReservationRepository (H2)")
+@DisplayName("Integration Tests for JdbcReservationRepository (MySQL)")
 class JdbcReservationRepositoryIT {
 
     private Connection connection;
@@ -35,14 +33,23 @@ class JdbcReservationRepositoryIT {
 
     @BeforeEach
     void setUp() throws SQLException {
-        // 1. Create a unique MySQL database
+        // --- INICIO DE LA MEJORA C2 ---
+        // 1. Leer la configuración de las Variables de Entorno del Sistema
+        String dbUser = System.getenv("DB_USER_TEST");
+        String dbPassword = System.getenv("DB_PASSWORD_TEST");
+
+        // 2. Omitir (SKP) la prueba si las variables no están configuradas
+        // Esto evita que el build falle, pero nos notifica.
+        Assumptions.assumeTrue(dbUser != null && dbPassword != null, 
+            "TEST OMITIDO: Las variables de entorno DB_USER_TEST y DB_PASSWORD_TEST no están configuradas.");
+
+        // 3. Usar las variables para conectarse
         String dbUrl = "jdbc:mysql://localhost:3306/bookingmx";
-        String user = "root"; // o el usuario que uses
-        String password = "123456"; // cámbialo según tu configuración
-        connection = DriverManager.getConnection(dbUrl, user, password);
+        connection = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        // --- FIN DE LA MEJORA C2 ---
 
 
-        // 2. Create the table schema for this test
+        // 2. Create the table schema for this test (sin cambios)
         try (Statement s = connection.createStatement()) {
             s.execute("DROP TABLE IF EXISTS reservations");
             s.execute("CREATE TABLE reservations ("
@@ -56,17 +63,18 @@ class JdbcReservationRepositoryIT {
         }
 
 
-        // 3. Create the real repository instance
+        // 3. Create the real repository instance (sin cambios)
         repository = new JdbcReservationRepository(connection);
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        // Close the connection, H2 will wipe the in-memory DB
         if (connection != null) {
             connection.close();
         }
     }
+    
+    // ... (El resto del archivo, con el helper y las 4 pruebas, queda EXACTAMENTE IGUAL) ...
     
     // --- Helper Method to pre-load data ---
     private void insertReservation(String id, String room, LocalDate in, LocalDate out, String status) throws SQLException {
@@ -114,11 +122,9 @@ class JdbcReservationRepositoryIT {
     @DisplayName("isRoomAvailable should return false when dates overlap")
     void testIsRoomAvailable_ReturnsFalseWhenOccupied() throws SQLException {
         // --- 1. ARRANGE ---
-        // A reservation exists from Day 1 to Day 5
         insertReservation("res-123", ROOM_A, DAY_1, DAY_5, "ACTIVE");
 
         // --- 2. ACT ---
-        // Try to book a new reservation from Day 3 to Day (any)
         boolean isAvailable = repository.isRoomAvailable(ROOM_A, DAY_3, DAY_5.plusDays(1));
 
         // --- 3. ASSERT ---
@@ -129,11 +135,9 @@ class JdbcReservationRepositoryIT {
     @DisplayName("isRoomAvailable should return true when no dates overlap")
     void testIsRoomAvailable_ReturnsTrue() throws SQLException {
         // --- 1. ARRANGE ---
-        // A reservation exists from Day 1 to Day 5
         insertReservation("res-123", ROOM_A, DAY_1, DAY_5, "ACTIVE");
         
         // --- 2. ACT ---
-        // Try to book a new reservation starting on Day 5 (check-out day)
         boolean isAvailable = repository.isRoomAvailable(ROOM_A, DAY_5, DAY_5.plusDays(2));
         
         // --- 3. ASSERT ---
