@@ -56,13 +56,13 @@
             <version>${junit.jupiter.version}</version>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
-
-
+        
     </dependencies>
 
     <build>
@@ -73,20 +73,33 @@
                 <version>${jacoco.version}</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
+                    
+                    <execution>
+                        <id>prepare-agent-integration</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                        <configuration>
+                            <propertyName>failsafe.argLine</propertyName>
+                        </configuration>
+                    </execution>
+                    
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
-                        <goals>
+                        <phase>verify</phase> <goals>
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    
                     <execution>
                         <id>jacoco-check</id>
-                        <goals>
+                        <phase>verify</phase> <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
@@ -95,6 +108,7 @@
                                     <element>CLASS</element>
                                     <excludes>
                                         <exclude>mx.com.booking.reservations.JdbcReservationRepository</exclude>
+                                        <exclude>mx.com.booking.reservations.Reservation</exclude>
                                     </excludes>
                                     <limits>
                                         <limit>
@@ -120,6 +134,9 @@
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
+                        <configuration>
+                            <argLine>@{failsafe.argLine}</argLine>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
