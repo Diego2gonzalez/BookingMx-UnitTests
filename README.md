@@ -53,13 +53,13 @@ We implemented a **two-layer testing architecture** to validate both business lo
 ```mermaid
 graph TD
     subgraph "Test Environment (Unit)"
-        A[ReservationServiceTest] -- 1. Injects Mock --> B((ReservationRepository Mock));
-        A -- 2. Calls method --> C(ReservationService);
-        B -- 3. Returns mock data --> C;
+        A[ReservationServiceTest] -- 1. Injects Mock --> B((ReservationRepository Mock))
+        A -- 2. Calls method --> C(ReservationService)
+        B -- 3. Returns mock data --> C
     end
 
     subgraph "Application"
-        C -- Depends on --> D[ReservationRepository (Interface)];
+        C -- Depends on --> D[ReservationRepository Interface]
     end
 
     A -- 4. Asserts results --> E(Test Passed/Failed);
