@@ -14,9 +14,9 @@ This project demonstrates **C2-level proficiency** by delivering scalable, autom
 
 | Rubric Criterion (C2 - Proficient) | Project Evidence & Justification |
 | :--- | :--- |
-| **Design and execution of unit tests with JUnit** | “Demonstrates **leadership and creativity**... in designing **effective testing strategies** in complex environments.” <br><br>✅ **Evidence:** Multi-layered testing strategy: <br> 1. **Unit Tests (Mocking):** Used Mockito to isolate business logic (`ReservationService`). <br> 2. **Integration Tests (H2):** Used an in-memory DB to validate *real SQL* (`JdbcReservationRepository`). <br> 3. **Parameterized Tests:** Used `@ParameterizedTest` to achieve 100% branch coverage. |
+| **Design and execution of unit tests with JUnit** | “Demonstrates **leadership and creativity**... in designing **effective testing strategies** in complex environments.” <br><br>✅ **Evidence:** Multi-layered testing strategy: <br> 1. **Unit Tests (Mocking):** Used Mockito to isolate business logic (`ReservationService`). <br> 2. **Integration Tests (MySQL):** Used a real local DB to validate *real SQL* (`JdbcReservationRepository`). <br> 3. **Parameterized Tests:** Used `@ParameterizedTest` to achieve 100% branch coverage. |
 | **Process Documentation** | “Demonstrates leadership... establishing **innovative standards and procedures** for documentation.” <br><br>🧭 **Evidence:** C2-level process automation: <br> 1. **GitHub Actions (CI/CD):** Workflow (`ci.yml`) runs all tests on each push. <br> 2. **Quality Gate:** Build *fails automatically* if JaCoCo < 90%. <br> 3. **3-Part Docs:** `JavaDoc` (What) • `README.md` (How) • `SPRINT1_LOG.md` (Why). |
-| **Integration of innovative elements** | “Identifies and integrates **highly innovative solutions**, considering scalability.” <br><br>⚙️ **Evidence:** <br> 1. **DI Pattern:** The `Service/Repository` architecture scales easily for future modules (`PaymentService`, etc.). <br> 2. **Cross-Platform Build:** Using Maven, H2, and GitHub Actions guarantees identical results across OS and IDEs. |
+| **Integration of innovative elements** | “Identifies and integrates **highly innovative solutions**, considering scalability.” <br><br>⚙️ **Evidence:** <br> 1. **DI Pattern:** The `Service/Repository` architecture scales easily for future modules (`PaymentService`, etc.). <br> 2. **Cross-Platform Build:** Using Maven, MySQL, and GitHub Actions guarantees identical results across OS and IDEs. |
 
 ---
 
@@ -31,7 +31,7 @@ This project is powered by **Apache Maven**, ensuring consistency across platfor
 | 🧪 **JUnit 5** | Core Testing Framework | `5.9.1` |
 | 🧠 **Mockito** | Mocking Framework (for Unit Tests) | `5.5.0` |
 | 📈 **JaCoCo** | Code Coverage Report Tool | `0.8.8` |
-| 💾 **H2 Database** | In-Memory DB (for Integration Tests) | `2.2.224` |
+| 💾 **MySQL Database** | Real DB (for Integration Tests) | `8.x` |
 | 🚦 **Maven Failsafe** | Runs Integration Tests (`*IT.java`) | `3.2.5` |
 
 ---
@@ -67,12 +67,31 @@ graph TD
 
 ---
 
-### 🧩 Layer 2: Integration Tests (H2 Database)
+### 🧩 Layer 2: Integration Tests (MySQL Database)
 
 **Purpose:** Validate **real SQL logic** in `JdbcReservationRepository`.  
-**Tool:** H2 (in-memory DB) + Maven Failsafe.  
-**Goal:** Ensure queries like `findById` and `isRoomAvailable` run correctly in an actual DB context.  
+**Tool:** MySQL (real local DB) + Maven Failsafe.  
+**Goal:** Ensure queries like `findById` and `isRoomAvailable` run correctly in a true DB context.  
 **Execution:** Automatically runs during Maven’s `verify` phase.
+
+---
+
+## 🖼️ Database Insertion Proof (MySQL)
+
+To confirm that **data persistence works correctly**, an integration test inserts a sample reservation and verifies it in MySQL.
+
+✅ **Example Query Output:**
+```sql
+SELECT * FROM reservations;
+```
+
+**Expected Result:**
+| id | guest_name | room_number | check_in | check_out |
+|----|-------------|-------------|-----------|------------|
+| 1  | John Doe    | 101         | 2025-11-01 | 2025-11-03 |
+
+📸 **Screenshot: Successful Data Insertion**
+<img width="1185" height="544" alt="Screenshot 2025-11-09 at 3 33 22 p m" src="ScreenShots\DB.png" />
 
 ---
 
@@ -83,11 +102,11 @@ This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`
 🔁 **Workflow Tasks:**
 1. Trigger on each `push` to `main` or `dev-david`.
 2. Set up Ubuntu VM with Java 17 + Maven.
-3. Run full build pipeline:  
+3. Run full build pipeline:
    ```bash
    mvn clean verify
    ```
-4. Execute all **12 tests** (8 Unit + 4 Integration).  
+4. Execute all **12 tests** (8 Unit + 4 Integration).
 5. Enforce **Quality Gate** → Build fails if coverage < 90%.
 
 ---
@@ -95,8 +114,9 @@ This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`
 ## 🏃 How to Run the Project Locally
 
 ### ⚙️ Requirements
-- Java JDK 11 or higher  
+- Java JDK 11 or higher
 - Apache Maven
+- MySQL Server running locally
 
 ---
 
@@ -106,7 +126,7 @@ This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`
 mvn clean test
 ```
 
-🧾 *Optional:* Open the coverage report:  
+🧾 *Optional:* Open the coverage report:
 ```bash
 open target/site/jacoco/index.html
 ```
@@ -121,7 +141,7 @@ Runs all tests and applies CI/CD checks exactly like GitHub Actions.
 mvn clean verify
 ```
 
-✅ **Expected Output:**  
+✅ **Expected Output:**
 ```
 [INFO] BUILD SUCCESS
 Tests run: 12, Failures: 0, Errors: 0
@@ -133,11 +153,10 @@ Tests run: 12, Failures: 0, Errors: 0
 
 ## 📚 Project Documentation
 
-- 🧠 **Internal:** All classes and methods are documented with **JavaDoc**.  
+- 🧠 **Internal:** All classes and methods are documented with **JavaDoc**.
 - 🗂️ **External:** Architectural decisions logged in **[SPRINT1_LOG.md](https://www.google.com/search?q=SPRINT1_LOG.md)**.
 
 ---
 
-✨ *Maintained by **Luis David Mag** — Data Engineer & Automation Specialist.*  
+✨ *Maintained by **Luis David Mag** & **Diego G***  
 📦 *Version:* `C2-Final-Sprint1`
-

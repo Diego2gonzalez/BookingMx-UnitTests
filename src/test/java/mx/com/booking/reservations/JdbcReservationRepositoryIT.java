@@ -35,21 +35,27 @@ class JdbcReservationRepositoryIT {
 
     @BeforeEach
     void setUp() throws SQLException {
-        // 1. Create a unique in-memory H2 database for each test
-        String dbUrl = "jdbc:h2:mem:" + java.util.UUID.randomUUID() + ";DB_CLOSE_DELAY=-1";
-        connection = DriverManager.getConnection(dbUrl, "sa", ""); // user: sa, pass: (empty)
-        
+        // 1. Create a unique MySQL database
+        String dbUrl = "jdbc:mysql://localhost:3306/bookingmx";
+        String user = "root"; // o el usuario que uses
+        String password = "123456"; // cámbialo según tu configuración
+        connection = DriverManager.getConnection(dbUrl, user, password);
+
+
         // 2. Create the table schema for this test
         try (Statement s = connection.createStatement()) {
-            s.execute("CREATE TABLE reservations (" +
-                    "reservation_id VARCHAR(255) PRIMARY KEY, " +
-                    "room_id VARCHAR(255), " +
-                    "user_id VARCHAR(255), " +
-                    "check_in DATE, " +
-                    "check_out DATE, " +
-                    "status VARCHAR(50))");
+            s.execute("DROP TABLE IF EXISTS reservations");
+            s.execute("CREATE TABLE reservations ("
+                    + "reservation_id VARCHAR(255) PRIMARY KEY, "
+                    + "room_id VARCHAR(255), "
+                    + "user_id VARCHAR(255), "
+                    + "check_in DATE, "
+                    + "check_out DATE, "
+                    + "status VARCHAR(50)"
+                    + ")");
         }
-        
+
+
         // 3. Create the real repository instance
         repository = new JdbcReservationRepository(connection);
     }
