@@ -95,6 +95,23 @@ SELECT * FROM reservations;
 
 ---
 
+
+## 🔑 C2 Improvement: Secure Credential Management
+
+
+Problem: You must never save passwords or usernames in source code (git). It's a major security risk and breaks collaboration (e.g., Diego has different credentials than Luis).
+
+Solution: We use Environment Variables.
+
+The test code JdbcReservationRepositoryIT.java is "agnostic" and reads credentials using System.getenv("DB_USER_TEST").
+
+Each developer sets these variables on their own local machine.
+
+The CI/CD pipeline reads them from encrypted GitHub Secrets.
+
+This is an innovative and secure procedure that ensures the project is both safe and scalable for any number of collaborators.
+
+
 ## 🤖 Continuous Integration / Continuous Deployment (CI/CD)
 
 This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`).
@@ -102,12 +119,13 @@ This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`
 🔁 **Workflow Tasks:**
 1. Trigger on each `push` to `main` or `dev-david`.
 2. Set up Ubuntu VM with Java 17 + Maven.
-3. Run full build pipeline:
+3. Securely Injects the DB_USER_TEST and DB_PASSWORD_TEST credentials from GitHub Secrets.
+4. Runs the full C2 build command:
    ```bash
    mvn clean verify
    ```
-4. Execute all **12 tests** (8 Unit + 4 Integration).
-5. Enforce **Quality Gate** → Build fails if coverage < 90%.
+5. Execute all **12 tests** (8 Unit + 4 Integration).
+6. Enforce **Quality Gate** → Build fails if coverage < 90%.
 
 ---
 
@@ -120,32 +138,34 @@ This repository is automated with **GitHub Actions** (`.github/workflows/ci.yml`
 
 ---
 
-### 🧩 1. Run **Unit Tests Only** (Fast Execution)
+Before running the tests, you must set the environment variables that your Java code will read.
 
-```bash
-mvn clean test
-```
+A) On your Mac (Terminal): (These commands only last for your current terminal session)
 
-🧾 *Optional:* Open the coverage report:
-```bash
-open target/site/jacoco/index.html
-```
+Bash
 
----
+export DB_USER_TEST="booking_tester"
+export DB_PASSWORD_TEST="123456"
+B) For Diego on Windows (Command Prompt):
 
-### 🔬 2. Run **Full Pipeline** (Unit + Integration Tests)
+DOS
 
-Runs all tests and applies CI/CD checks exactly like GitHub Actions.
+set DB_USER_TEST="booking_tester"
+set DB_PASSWORD_TEST="123456"
+(Note: Ensure your local MySQL server is running and the bookingmx schema and user exist).
 
-```bash
+🔬 2. Run the FULL Pipeline (Unit + Integration Tests)
+Once your variables are set, run this command in the same terminal:
+
+Bash
+
 mvn clean verify
-```
+This command runs all 12 tests and applies all quality checks, exactly like the GitHub Actions CI/CD pipeline.
 
-✅ **Expected Output:**
-```
+✅ Expected Output:
+
 [INFO] BUILD SUCCESS
 Tests run: 12, Failures: 0, Errors: 0
-```
 
 <img width="1185" height="544" alt="Screenshot 2025-11-07 at 3 33 22 p m" src="https://github.com/user-attachments/assets/4cb11a59-193d-4724-975b-7c6ee98bd04e" />
 
@@ -158,5 +178,5 @@ Tests run: 12, Failures: 0, Errors: 0
 
 ---
 
-✨ *Maintained by **Luis David Mag** & **Diego G***  
+✨ *Maintained by **Luis David** & **Diego G***  
 📦 *Version:* `C2-Final-Sprint1`
